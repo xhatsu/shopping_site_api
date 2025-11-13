@@ -18,7 +18,8 @@ def init_auth_gateway(app):
 		# Optionally allow OPTIONS (CORS preflight)
 		if request.method == "OPTIONS":
 			return None
-
+		if path.startswith("/openapi.yaml") or path.startswith("/api/docs"):
+			return None
 		# Try to verify JWT; verify_jwt_in_request will raise on failure
 		try:
 			verify_jwt_in_request()
