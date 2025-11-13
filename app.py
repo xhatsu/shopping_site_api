@@ -1,6 +1,7 @@
 import os
 from flask import Flask, jsonify
 from flask_jwt_extended import JWTManager
+from flask_swagger_ui import get_swaggerui_blueprint
 from config import config
 from models import db
 from blueprints.auth import auth_bp
@@ -35,6 +36,24 @@ def create_app(config_name=None):
     app.register_blueprint(products_bp)
     app.register_blueprint(cart_bp)
     
+    # Swagger UI setup
+    swagger_url = '/api/docs'
+    api_url = '/openapi.yaml'
+    swagger_ui_blueprint = get_swaggerui_blueprint(
+        swagger_url,
+        api_url,
+        config={'app_name': 'Shopping Site API'}
+    )
+    app.register_blueprint(swagger_ui_blueprint, url_prefix=swagger_url)
+    
+    # Serve OpenAPI spec
+    @app.route('/openapi.yaml')
+    def openapi_spec():
+        import yaml
+        with open('openapi.yaml', 'r') as f:
+            spec = yaml.safe_load(f)
+        return spec
+    
     # Health check endpoint
     @app.route('/health', methods=['GET'])
     def health():
@@ -51,8 +70,7 @@ def create_app(config_name=None):
     
     # Create tables
     with app.app_context():
-        none = None
-        # db.create_all()
+        db.create_all()
     
     return app
 
