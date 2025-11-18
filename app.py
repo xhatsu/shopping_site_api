@@ -2,6 +2,7 @@ import os
 from flask import Flask, jsonify
 from flask_jwt_extended import JWTManager
 from flask_swagger_ui import get_swaggerui_blueprint
+from flask_cors import CORS
 from config import config
 from models import db
 from blueprints.auth import auth_bp
@@ -23,6 +24,11 @@ def create_app(config_name=None):
             "DATABASE_URL environment variable is not set. "
             "Provide it via environment (recommended in Kubernetes) or a .env file."
         )
+    
+    # Initialize CORS with allowed origins from environment
+    cors_origins = os.getenv('CORS_ORIGINS', 'http://158.178.228.216:3000').split(',')
+    cors_origins = [origin.strip() for origin in cors_origins]
+    CORS(app, origins=cors_origins, supports_credentials=True)
     
     # Initialize extensions
     db.init_app(app)
