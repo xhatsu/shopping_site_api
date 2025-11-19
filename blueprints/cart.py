@@ -25,12 +25,19 @@ def get_cart():
 def add_to_cart():
     """Add product to cart"""
     user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': f'User with id {user_id} not found'}), 404
+    
     data = request.get_json()
     
     if not data or not data.get('product_id'):
         return jsonify({'error': 'Missing product_id'}), 400
     
-    product = Product.query.get_or_404(data['product_id'])
+    product = Product.query.get(data['product_id'])
+    if not product:
+        return jsonify({'error': f'Product with id {data["product_id"]} not found'}), 404
+    
     quantity = int(data.get('quantity', 1))
     
     if quantity <= 0:
@@ -42,7 +49,7 @@ def add_to_cart():
     cart_item = CartItem.query.filter_by(
         user_id=user_id,
         product_id=product.id
-    ).first_or_404()
+    ).first()
     
     if cart_item:
         cart_item.quantity += quantity
